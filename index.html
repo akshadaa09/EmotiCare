@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EmotiCare — AI Mood Detector & Therapy Coach</title>
+
+  <!-- Tailwind from CDN (already in your template) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Feather icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            secondary: '#8b5cf6'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold text-primary">EmotiCare</h1>
+      <p class="text-gray-600 mt-2">AI Mood Detector & Therapy Coach — Demo</p>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Input -->
+      <section class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-2xl font-semibold text-primary mb-4">Mood Detection</h2>
+
+        <div class="flex border rounded-lg overflow-hidden mb-4">
+          <button id="text-tab" class="flex-1 py-2 px-4 bg-primary text-white">Text</button>
+          <button id="image-tab" class="flex-1 py-2 px-4 bg-gray-100">Image</button>
+        </div>
+
+        <!-- Text form -->
+        <div id="text-form">
+          <form id="text-analysis-form" class="space-y-4">
+            <div>
+              <label for="user-text" class="block text-sm font-medium text-gray-700">How are you feeling?</label>
+              <textarea id="user-text" rows="5" class="mt-1 block w-full border rounded-md p-3" placeholder="Write what you feel..."></textarea>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="analyze-text-btn" type="button" class="flex-1 bg-primary text-white py-2 rounded-md">Analyze Mood</button>
+              <button id="save-journal-btn" type="button" class="flex-1 border border-gray-200 py-2 rounded-md">Save Journal</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Image form -->
+        <div id="image-form" class="hidden">
+          <form id="image-analysis-form" class="space-y-4">
+            <div class="border-2 border-dashed rounded-lg p-6 text-center">
+              <div id="image-preview" class="hidden mb-4">
+                <img id="preview" src="#" alt="Preview" class="mx-auto max-h-56 rounded-lg" />
+              </div>
+              <label for="user-image" class="cursor-pointer inline-block px-4 py-3 rounded-md bg-gray-50 hover:bg-gray-100">
+                <div class="flex flex-col items-center">
+                  <i data-feather="camera" class="w-8 h-8 text-gray-400 mb-2"></i>
+                  <p class="text-sm text-gray-600">Upload selfie (jpg, png)</p>
+                </div>
+                <input type="file" id="user-image" accept="image/*" class="hidden" />
+              </label>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="analyze-image-btn" type="button" class="flex-1 bg-primary text-white py-2 rounded-md">Analyze Expression</button>
+              <button id="clear-image-btn" type="button" class="flex-1 border border-gray-200 py-2 rounded-md">Clear</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="mt-6 text-xs text-gray-500">
+          <strong>Privacy:</strong> Your data stays local in this demo (history saved to browser localStorage and a sessions.json server file). Do not enter extremely sensitive personal details. This app is not a replacement for a professional.
+        </div>
+      </section>
+
+      <!-- Right: Results -->
+      <section class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-2xl font-semibold text-primary mb-4">Your Results</h2>
+
+        <div id="results-container" class="hidden">
+          <div id="risk-alert" class="mb-4 p-4 rounded-lg hidden"></div>
+
+          <div id="mood-card" class="mb-4 p-4 rounded-lg border">
+            <div class="flex justify-between">
+              <div>
+                <h3 id="mood-label" class="text-xl font-semibold">Mood</h3>
+                <p id="mood-reason" class="text-gray-600 mt-1"></p>
+              </div>
+              <div>
+                <span id="confidence" class="px-3 py-1 rounded-full text-sm bg-gray-100"></span>
+              </div>
+            </div>
+          </div>
+
+          <div id="therapy-cards" class="space-y-4">
+            <div class="p-4 border rounded">
+              <h4 class="font-semibold text-primary mb-2">Advice</h4>
+              <p id="advice" class="text-gray-700"></p>
+            </div>
+
+            <div class="p-4 border rounded">
+              <h4 class="font-semibold text-primary mb-2">Immediate Actions</h4>
+              <ul id="actions" class="list-disc ml-5 text-gray-700"></ul>
+            </div>
+
+            <div class="p-4 border rounded">
+              <h4 class="font-semibold text-primary mb-2">Journaling Prompt</h4>
+              <p id="journal-prompt" class="text-gray-700"></p>
+            </div>
+
+            <div class="p-4 border rounded">
+              <h4 class="font-semibold text-primary mb-2">Follow-up Suggestion</h4>
+              <p id="follow-up" class="text-gray-700"></p>
+            </div>
+          </div>
+        </div>
+
+        <div id="no-results" class="text-gray-500">
+          No analysis yet — write something or upload an image and press Analyze.
+        </div>
+
+        <hr class="my-4" />
+
+        <h3 class="text-lg font-semibold mb-2">Mood History (last 7)</h3>
+        <canvas id="mood-chart" class="mb-4"></canvas>
+        <div id="history-list" class="text-sm text-gray-700"></div>
+        <div class="mt-4 flex gap-2">
+          <button id="export-history-btn" class="flex-1 border py-2 rounded">Export Summary</button>
+          <button id="clear-history-btn" class="flex-1 border py-2 rounded">Clear History</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="text-center text-xs text-gray-500 mt-8">
+      EmotiCare — AI support demo. Not a replacement for professional help.
+    </footer>
+  </div>
+
+  <script>feather.replace()</script>
+</body>
+</html>

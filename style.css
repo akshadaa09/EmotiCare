@@ -1,0 +1,5 @@
+/* style.css - minor overrides */
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+.tab-active { background-color: #6366f1; color: white; }
+.hidden { display: none; }
+#risk-alert { background: #fee2e2; border: 1px solid #fca5a5; color: #7f1d1d; }
